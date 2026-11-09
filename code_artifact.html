@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什麼？抽籤器</title>
+    <!-- 載入 Tailwind CSS 以實現現代化與乾淨的排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 增加一點抽中結果時的彈出動畫，提升使用者體驗 */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <!-- 主容器 -->
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8 flex flex-col space-y-5">
+        
+        <!-- 標題 -->
+        <h1 class="text-2xl sm:text-3xl font-bold text-center text-slate-900 tracking-tight">
+            今天吃什麼？ 🤔
+        </h1>
+
+        <!-- 文字輸入區 -->
+        <div class="flex flex-col space-y-2">
+            <label for="optionsInput" class="text-sm font-medium text-slate-600">
+                請輸入選項 (每行一個)：
+            </label>
+            <textarea 
+                id="optionsInput" 
+                rows="6" 
+                class="w-full p-4 border border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none shadow-inner"
+                placeholder="請輸入您的選項..."
+            >珍奶
+多多綠
+豆漿
+蜂蜜水</textarea>
+        </div>
+
+        <!-- 抽取按鈕 -->
+        <button 
+            id="drawBtn" 
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+            幫我選
+        </button>
+
+        <!-- 結果顯示區 -->
+        <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-6 min-h-[120px] flex items-center justify-center text-center transition-colors duration-200" id="resultContainer">
+            <div id="resultArea" class="text-lg text-slate-400 font-medium">
+                點擊上方按鈕開始抽籤！
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- 邏輯處理 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawBtn = document.getElementById('drawBtn');
+            const optionsInput = document.getElementById('optionsInput');
+            const resultArea = document.getElementById('resultArea');
+            const resultContainer = document.getElementById('resultContainer');
+
+            drawBtn.addEventListener('click', () => {
+                // 1. 取得輸入的原始文字
+                const rawText = optionsInput.value;
+
+                // 2. 將字串以換行符號切割成陣列
+                let options = rawText.split('\n');
+
+                // 3. 處理陣列：去除前後空白、過濾空字串
+                options = options
+                    .map(opt => opt.trim())
+                    .filter(opt => opt.length > 0);
+
+                // 4. 移除重複的選項 (使用 Set)
+                options = [...new Set(options)];
+
+                // 5. 判斷處理後的清單是否為空
+                if (options.length === 0) {
+                    resultArea.innerHTML = '⚠️ 請先輸入至少一個選項';
+                    resultArea.className = 'text-red-500 text-lg font-bold animate-pop';
+                    resultContainer.classList.add('border-red-300', 'bg-red-50');
+                    resultContainer.classList.remove('border-slate-300', 'border-indigo-300', 'bg-slate-50', 'bg-indigo-50');
+                    return;
+                }
+
+                // 6. 隨機選取一個選項 (所有有效選項機率相等)
+                const randomIndex = Math.floor(Math.random() * options.length);
+                const selectedOption = options[randomIndex];
+
+                // 7. 顯示結果並加上視覺效果
+                // 重製動畫
+                resultArea.classList.remove('animate-pop');
+                void resultArea.offsetWidth; // 觸發 reflow 讓動畫可以重新播放
+
+                resultArea.innerHTML = `🎉 <span class="text-2xl font-black mx-2 text-indigo-700">${selectedOption}</span> 🎉`;
+                resultArea.className = 'text-indigo-900 flex items-center justify-center animate-pop';
+                
+                // 改變外框顏色增加儀式感
+                resultContainer.classList.add('border-indigo-300', 'bg-indigo-50');
+                resultContainer.classList.remove('border-slate-300', 'border-red-300', 'bg-slate-50', 'bg-red-50');
+            });
+        });
+    </script>
+</body>
+</html>
